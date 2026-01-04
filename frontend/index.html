@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Invoice QR Upload</title>
+</head>
+<body>
+    <h2>Upload Invoice</h2>
+
+    <form action="http://127.0.0.1:8000/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" required />
+        <br><br>
+        <button type="submit">Upload</button>
+    </form>
+</body>
+</html>

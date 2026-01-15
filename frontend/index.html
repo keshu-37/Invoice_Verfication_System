@@ -1,15 +1,138 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Invoice QR Upload</title>
-</head>
-<body>
-    <h2>Upload Invoice</h2>
+<meta charset="UTF-8">
+<title>GST Invoice Verification</title>
 
-    <form action="http://127.0.0.1:8000/upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" required />
-        <br><br>
-        <button type="submit">Upload</button>
-    </form>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f6f8;
+    }
+
+    .container {
+        width: 420px;
+        margin: 80px auto;
+        padding: 25px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+        text-align: center;
+        color: #003366;
+    }
+
+    .subtitle {
+        text-align: center;
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 20px;
+    }
+
+    input[type="file"] {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+
+    button {
+        width: 100%;
+        padding: 10px;
+        background: #003366;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 4px;
+    }
+
+    button:hover {
+        background: #0055aa;
+    }
+
+    .result {
+        margin-top: 20px;
+        padding: 12px;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .success {
+        background: #e6ffed;
+        color: #1a7f37;
+        border: 1px solid #1a7f37;
+    }
+
+    .error {
+        background: #ffe6e6;
+        color: #b30000;
+        border: 1px solid #b30000;
+    }
+
+    .hidden {
+        display: none;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>GST e-Invoice Verification</h1>
+    <p class="subtitle">Government Invoice Authenticity Checker</p>
+
+    <input type="file" id="invoiceFile" accept=".pdf,.png,.jpg,.jpeg">
+    <button onclick="uploadInvoice()">Verify Invoice</button>
+
+    <div id="result" class="result hidden"></div>
+</div>
+
+<script>
+async function uploadInvoice() {
+    const fileInput = document.getElementById("invoiceFile");
+    const resultDiv = document.getElementById("result");
+
+    if (!fileInput.files.length) {
+        alert("Please select an invoice file");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+
+    resultDiv.className = "result";
+    resultDiv.innerHTML = "Verifying invoice...";
+    resultDiv.classList.remove("hidden");
+
+    try {
+        const response = await fetch("http://127.0.0.1:8000/upload-invoice", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.government_invoice) {
+            resultDiv.classList.add("success");
+            resultDiv.innerHTML = `
+                <strong>✅ Government Invoice Verified</strong><br><br>
+                File Name: ${data.file_name}<br>
+                Request ID: ${data.request_id}
+            `;
+        } else {
+            resultDiv.classList.add("error");
+            resultDiv.innerHTML = `
+                <strong> Not a Government Invoice</strong><br><br>
+                File Name: ${data.file_name}
+            `;
+        }
+
+    } catch (error) {
+        resultDiv.classList.add("error");
+        resultDiv.innerHTML = " Backend server not reachable.";
+    }
+}
+</script>
+
 </body>
 </html>

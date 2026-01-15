@@ -1,10 +1,10 @@
 fastapi
 uvicorn
 mysql-connector-python
-pydantic
 numpy
 opencv-python
-python-multipart
-pillow
+pyzbar
 pymupdf
-
+pyjwt
+cryptography
+python-multipart

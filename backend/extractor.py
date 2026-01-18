@@ -25,7 +25,7 @@ def extract_from_pdf(pdf_bytes):
     doc = fitz.open(stream=pdf_bytes, filetype="pdf")
 
     for page in doc:
-        # 🔥 High DPI render (FAST)
+        #  High DPI render (FAST)
         pix = page.get_pixmap(dpi=300)
         img = np.frombuffer(pix.samples, dtype=np.uint8)
         img = img.reshape(pix.height, pix.width, pix.n)

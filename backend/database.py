@@ -35,7 +35,7 @@ def save_invoice(record):
 
         cursor.execute(query, values)
 
-        conn.commit()  # ✅ VERY IMPORTANT
+        conn.commit()  
 
         print(">>> Insert successful | ID:", cursor.lastrowid)
 

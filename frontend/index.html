@@ -97,8 +97,9 @@ async function uploadInvoice() {
         return;
     }
 
+    const file = fileInput.files[0];
     const formData = new FormData();
-    formData.append("file", fileInput.files[0]);
+    formData.append("file", file);
 
     resultDiv.className = "result";
     resultDiv.innerHTML = "Verifying invoice...";
@@ -112,6 +113,17 @@ async function uploadInvoice() {
 
         const data = await response.json();
 
+        // ❌ ERROR RESPONSE (400, 422, etc.)
+        if (!response.ok) {
+            resultDiv.classList.add("error");
+            resultDiv.innerHTML = `
+                <strong>⚠️ Verification Failed</strong><br><br>
+                ${data.detail || "Invalid invoice file."}
+            `;
+            return;
+        }
+
+        // ✅ SUCCESS RESPONSE
         if (data.government_invoice) {
             resultDiv.classList.add("success");
             resultDiv.innerHTML = `
@@ -122,14 +134,14 @@ async function uploadInvoice() {
         } else {
             resultDiv.classList.add("error");
             resultDiv.innerHTML = `
-                <strong> Not a Government Invoice</strong><br><br>
-                File Name: ${data.file_name}
+                <strong>❌ Not a Government Invoice</strong><br><br>
+                File Name: ${data.file_name || file.name}
             `;
         }
 
     } catch (error) {
         resultDiv.classList.add("error");
-        resultDiv.innerHTML = " Backend server not reachable.";
+        resultDiv.innerHTML = "❌ Backend server not reachable.";
     }
 }
 </script>

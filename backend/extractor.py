@@ -32,33 +32,32 @@ def is_scanned_pdf(doc: fitz.Document) -> bool:
         text_len = len(page.get_text("text").strip())
         images = page.get_images(full=True)
 
-        # Case 1: Image-dominant page with little text
+        # Image-dominant page (scan or phone PDF)
         if images and text_len < 200:
             return True
 
-        # Case 2: Truly digital PDF
+        # Strong digital signal
         if text_len > 500:
             return False
 
-    # Default to scanned for safety
+    # Default safe assumption
     return True
 
 
 def extract_from_pdf(pdf_bytes):
     doc = fitz.open(stream=pdf_bytes, filetype="pdf")
 
-    # 🚨 FAST SCANNED PDF REJECTION
-    if is_scanned_pdf(doc):
-        print(">>> SCANNED PDF DETECTED - Rejecting early")
-        raise HTTPException(
-            status_code=400,
-            detail="Scanned PDF detected. Please upload the original digital GST e-Invoice."
-        )
+    scanned = is_scanned_pdf(doc)
 
-    # ✅ ONLY digital PDFs reach here
+    if scanned:
+        print(">>> SCANNED PDF DETECTED - Using image-based QR extraction")
+    else:
+        print(">>> DIGITAL PDF DETECTED - Using standard QR extraction")
+
     for page in doc:
-        # ⚡ Lower DPI for performance (QR safe)
-        pix = page.get_pixmap(dpi=200)
+        # 🔁 Higher DPI for scanned PDFs
+        dpi = 300 if scanned else 200
+        pix = page.get_pixmap(dpi=dpi)
 
         img = np.frombuffer(pix.samples, dtype=np.uint8)
         img = img.reshape(pix.height, pix.width, pix.n)
@@ -66,7 +65,7 @@ def extract_from_pdf(pdf_bytes):
         if pix.n == 4:  # RGBA → BGR
             img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
 
-        # 🚀 QR size fast-fail
+        # 🚀 Size fast-fail
         h, w = img.shape[:2]
         if h < 300 or w < 300:
             continue
@@ -75,6 +74,7 @@ def extract_from_pdf(pdf_bytes):
         if result:
             return result
 
+    print(">>> QR NOT FOUND IN PDF")
     return None
 
 
@@ -103,5 +103,4 @@ def try_decode(img):
             print(">>> QR FOUND:", data)
             return data
 
-    print(">>> QR NOT FOUND")
     return None

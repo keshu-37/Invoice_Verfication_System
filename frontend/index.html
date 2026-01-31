@@ -63,6 +63,12 @@
         border: 1px solid #1a7f37;
     }
 
+    .warning {
+        background: #fff8e1;
+        color: #8a6d00;
+        border: 1px solid #8a6d00;
+    }
+
     .error {
         background: #ffe6e6;
         color: #b30000;
@@ -79,7 +85,7 @@
 
 <div class="container">
     <h1>GST e-Invoice Verification</h1>
-    <p class="subtitle">Government Invoice Authenticity Checker</p>
+    <p class="subtitle">Offline QR-Based Invoice Validation</p>
 
     <input type="file" id="invoiceFile" accept=".pdf,.png,.jpg,.jpeg">
     <button onclick="uploadInvoice()">Verify Invoice</button>
@@ -97,12 +103,11 @@ async function uploadInvoice() {
         return;
     }
 
-    const file = fileInput.files[0];
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", fileInput.files[0]);
 
     resultDiv.className = "result";
-    resultDiv.innerHTML = "Verifying invoice...";
+    resultDiv.innerHTML = "🔍 Verifying invoice...";
     resultDiv.classList.remove("hidden");
 
     try {
@@ -113,31 +118,73 @@ async function uploadInvoice() {
 
         const data = await response.json();
 
-        // ❌ ERROR RESPONSE (400, 422, etc.)
         if (!response.ok) {
             resultDiv.classList.add("error");
             resultDiv.innerHTML = `
-                <strong>⚠️ Verification Failed</strong><br><br>
-                ${data.detail || "Invalid invoice file."}
+                <strong>❌ Verification Failed</strong><br><br>
+                ${data.reason || "Invalid invoice file."}
             `;
             return;
         }
 
-        // ✅ SUCCESS RESPONSE
-        if (data.government_invoice) {
-            resultDiv.classList.add("success");
+        const status = data.status;
+
+        // ✅ Government verified
+        if (status === "GOVERNMENT_VERIFIED") {
+            if (data.risk_level === "LOW") {
+                resultDiv.classList.add("success");
+                resultDiv.innerHTML = `
+                    <strong>✅ Government Invoice Verified</strong><br><br>
+                    <b>File:</b> ${data.file_name}<br>
+                    <b>Request ID:</b> ${data.request_id}<br><br>
+                    Original digital invoice (Low Risk)
+                `;
+            } else {
+                resultDiv.classList.add("warning");
+                resultDiv.innerHTML = `
+                    <strong>⚠️ Government Invoice Verified (Scanned Copy)</strong><br><br>
+                    <b>File:</b> ${data.file_name}<br>
+                    <b>Request ID:</b> ${data.request_id}<br><br>
+                    QR verified successfully.<br>
+                    This is a scanned copy (Medium Risk).
+                `;
+            }
+            return;
+        }
+
+        // ⚠️ DUPLICATE INVOICE (NEW)
+        if (status === "DUPLICATE_INVOICE") {
+            resultDiv.classList.add("warning");
             resultDiv.innerHTML = `
-                <strong>✅ Government Invoice Verified</strong><br><br>
-                File Name: ${data.file_name}<br>
-                Request ID: ${data.request_id}
+                <strong>⚠️ Duplicate Invoice</strong><br><br>
+                ${data.message}
             `;
-        } else {
+            return;
+        }
+
+        // ❌ Tampered
+        if (status === "TAMPERED") {
             resultDiv.classList.add("error");
             resultDiv.innerHTML = `
-                <strong>❌ Not a Government Invoice</strong><br><br>
-                File Name: ${data.file_name || file.name}
+                <strong>❌ Tampered Invoice Detected</strong><br><br>
+                ${data.reason}
             `;
+            return;
         }
+
+        // ❌ Not verified
+        if (status === "NOT_GOVERNMENT_VERIFIED") {
+            resultDiv.classList.add("error");
+            resultDiv.innerHTML = `
+                <strong>⚠️ Not Government Verified</strong><br><br>
+                ${data.reason}
+            `;
+            return;
+        }
+
+        // Fallback
+        resultDiv.classList.add("error");
+        resultDiv.innerHTML = "❌ Unknown verification result.";
 
     } catch (error) {
         resultDiv.classList.add("error");

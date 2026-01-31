@@ -8,3 +8,4 @@ pymupdf
 pyjwt
 cryptography
 python-multipart
+sqlalchemy

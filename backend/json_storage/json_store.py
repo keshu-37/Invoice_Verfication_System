@@ -1,28 +1,74 @@
 import json
 from pathlib import Path
-from datetime import datetime
 
-JSON_FILE = Path(__file__).parent / "verified_invoices.json"
 
-def save_invoice_to_json(audit_record):
+BASE_PATH = Path(__file__).parent
+VERIFIED_FILE = BASE_PATH / "verified.json"
+NON_VERIFIED_FILE = BASE_PATH / "non_verified.json"
+
+
+# -------------------------------------------------
+# INTERNAL: SAFE JSON LOAD
+# -------------------------------------------------
+def _safe_load_json(file_path: Path) -> list:
+    """
+    Safely load JSON array from file.
+    Handles:
+    - missing file
+    - empty file
+    - corrupted JSON
+    """
+    if not file_path.exists():
+        return []
+
     try:
-        if not JSON_FILE.exists():
-            JSON_FILE.write_text("[]")
+        content = file_path.read_text(encoding="utf-8").strip()
+        if not content:
+            return []
+        return json.loads(content)
+    except Exception:
+        print(f"⚠️ Corrupted or empty JSON detected, resetting: {file_path.name}")
+        return []
 
-        data = json.loads(JSON_FILE.read_text())
 
-        data.append({
-            "file_name": audit_record["file_name"],
-            "file_type": audit_record["file_type"],
-            "government_invoice": audit_record["government_invoice"],
-            "qr_data": audit_record["qr_data_raw"],
-            "stored_at": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ UTC")
-        })
+# -------------------------------------------------
+# SAVE INVOICE RECORD
+# -------------------------------------------------
+def save_invoice_to_json(record: dict):
+    try:
+        status = record.get("validation_result", {}).get("status", "UNKNOWN")
 
-        JSON_FILE.write_text(json.dumps(data, indent=2))
+        file_path = (
+            VERIFIED_FILE
+            if status == "GOVERNMENT_VERIFIED"
+            else NON_VERIFIED_FILE
+        )
 
-        print(">>> Saved invoice to JSON file")
+        BASE_PATH.mkdir(parents=True, exist_ok=True)
+
+        data = _safe_load_json(file_path)
+        data.append(record)
+
+        file_path.write_text(
+            json.dumps(data, indent=4, ensure_ascii=False),
+            encoding="utf-8"
+        )
+
+        print("✅ JSON appended:", file_path)
 
     except Exception as e:
-        # VERY IMPORTANT: do NOT break SQL flow
         print("⚠️ JSON save failed (ignored):", e)
+
+
+# -------------------------------------------------
+# DUPLICATE CHECK (JSON)
+# -------------------------------------------------
+def is_duplicate_invoice_json(invoice_hash: str) -> bool:
+    records = _safe_load_json(VERIFIED_FILE)
+
+    for record in records:
+        if record.get("invoice_hash") == invoice_hash:
+            return True
+
+    return False
+

@@ -1,4 +1,4 @@
-ENABLE_DATABASE = True   # 🔁 set True when DB is enabled
+ENABLE_DATABASE = True    
 
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
@@ -42,9 +42,9 @@ async def upload_invoice(file: UploadFile = File(...)):
 
     print(f"[{request_id}] Processing file:", file.filename)
 
-    # ------------------------------------------------
-    # 1️⃣ Extract QR data
-    # ------------------------------------------------
+     
+    #   Extract QR data
+     
     extracted = extract_qr(file_bytes, file.content_type)
 
     if not extracted:
@@ -59,23 +59,23 @@ async def upload_invoice(file: UploadFile = File(...)):
     qr_found = extracted.get("qr_found")
     qr_decoded = extracted.get("qr_decoded")
 
-    # 🔑 RAW QR STRING (JWT) — required by validator
+    #   RAW QR STRING (JWT) — required by validator
     qr_data_raw = extracted.get("qr_data_raw")
 
     print(f"[{request_id}] INPUT TYPE:", input_type)
     print(f"[{request_id}] QR FOUND:", qr_found)
     print(f"[{request_id}] QR DECODED:", qr_decoded)
 
-    # ------------------------------------------------
-    # 2️⃣ Generate invoice hash (for duplicates)
-    # ------------------------------------------------
+     
+    #   Generate invoice hash (for duplicates)
+     
     invoice_hash = None
     if qr_data_raw:
         invoice_hash = hashlib.sha256(qr_data_raw.encode()).hexdigest()
 
-    # ------------------------------------------------
-    # 3️⃣ DUPLICATE CHECK (DB + JSON)
-    # ------------------------------------------------
+     
+    #   DUPLICATE CHECK (DB + JSON)
+     
     if invoice_hash:
         if ENABLE_DATABASE:
             if is_duplicate_invoice_db(invoice_hash):
@@ -94,9 +94,9 @@ async def upload_invoice(file: UploadFile = File(...)):
                     "message": "Invoice already exists in system"
                 }
 
-    # ------------------------------------------------
-    # 4️⃣ Validate invoice (business logic)
-    # ------------------------------------------------
+     
+    #   Validate invoice (business logic)
+     
     validation_result = validate_invoice(
         input_type=input_type,
         qr_found=qr_found,
@@ -107,9 +107,9 @@ async def upload_invoice(file: UploadFile = File(...)):
 
     status = validation_result["status"]
 
-    # ------------------------------------------------
-    # 5️⃣ Audit record (always saved)
-    # ------------------------------------------------
+     
+    #   Audit record (always saved)
+    
     audit_record = {
         "request_id": request_id,
         "file_name": file.filename,
@@ -125,9 +125,9 @@ async def upload_invoice(file: UploadFile = File(...)):
         "validation_result": validation_result
     }
 
-    # ------------------------------------------------
-    # 6️⃣ Rejection handling
-    # ------------------------------------------------
+     
+    #   Rejection handling
+     
     if status != "GOVERNMENT_VERIFIED":
         print(f"[{request_id}] Invoice rejected:", validation_result["reason"])
         save_invoice_to_json(audit_record)
@@ -139,9 +139,9 @@ async def upload_invoice(file: UploadFile = File(...)):
             "reason": validation_result["reason"]
         }
 
-    # ------------------------------------------------
-    # 7️⃣ Accepted invoice → save
-    # ------------------------------------------------
+     
+    #   Accepted invoice → save
+     
     record = InvoiceRecord(
         file_name=file.filename,
         file_type=file.content_type,

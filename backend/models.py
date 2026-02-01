@@ -12,6 +12,6 @@ class InvoiceRecord:
     ):
         self.file_name = file_name
         self.file_type = file_type
-        self.invoice_hash = invoice_hash  # 🔑 UNIQUE invoice fingerprint
+        self.invoice_hash = invoice_hash  #   UNIQUE invoice fingerprint
         self.qr_data = qr_data
         self.created_at = created_at or datetime.now()

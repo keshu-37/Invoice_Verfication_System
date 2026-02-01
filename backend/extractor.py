@@ -6,7 +6,7 @@ import base64
 import json
 
 
-# ===================== QR JWT DECODER =====================
+#  QR JWT DECODER 
 def decode_qr_jwt(jwt_token: str) -> dict:
     """
     Decode GST e-invoice QR JWT payload into readable invoice data.
@@ -24,7 +24,7 @@ def decode_qr_jwt(jwt_token: str) -> dict:
         return {}
 
 
-# ===================== MAIN ENTRY =====================
+
 def extract_qr(file_bytes: bytes, content_type: str):
     print(">>> Extracting QR from:", content_type)
 
@@ -44,13 +44,13 @@ def extract_qr(file_bytes: bytes, content_type: str):
     return None
 
 
-# ===================== IMAGE =====================
+#  IMAGE 
 def extract_from_image(image_bytes):
     img = cv2.imdecode(np.frombuffer(image_bytes, np.uint8), cv2.IMREAD_COLOR)
     return try_decode(img)
 
 
-# ===================== SCANNED PDF DETECTOR =====================
+#  SCANNED PDF DETECTOR 
 def is_scanned_pdf(doc: fitz.Document) -> bool:
     for page in doc:
         text_len = len(page.get_text("text").strip())
@@ -64,7 +64,7 @@ def is_scanned_pdf(doc: fitz.Document) -> bool:
     return True
 
 
-# ===================== PDF =====================
+#   PDF  
 def extract_from_pdf(pdf_bytes):
     doc = fitz.open(stream=pdf_bytes, filetype="pdf")
 
@@ -106,7 +106,7 @@ def extract_from_pdf(pdf_bytes):
     }
 
 
-# ===================== QR DECODER =====================
+#   QR DECODER  
 def try_decode(img):
     if img is None:
         return None

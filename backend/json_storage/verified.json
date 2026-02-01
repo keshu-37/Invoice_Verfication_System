@@ -1,3 +1,31 @@
 [
-    
+    {
+        "request_id": "0d3368c4-c40d-40b0-aaaa-42c4cd0335fe",
+        "file_name": "gov_Scanned.jpg",
+        "file_type": "image/jpeg",
+        "input_type": "IMAGE",
+        "invoice_hash": "18f91a6624d6e65082e0ad61d18080ad4c0c3f9185a35bbecbfc41af71d3d3a1",
+        "qr": {
+            "found": true,
+            "decoded": true,
+            "invoice_data": {
+                "SellerGstin": "06AAACM0829Q1Z8",
+                "BuyerGstin": "06AAACI5832P1Z9",
+                "DocNo": "110210427786",
+                "DocTyp": "INV",
+                "DocDt": "01/12/2025",
+                "TotInvVal": 1095911.02,
+                "ItemCnt": 2,
+                "MainHsnCode": "84073210",
+                "Irn": "5b135058e7e64bb51e901c496ed18c76431faca7c50a93a3f9e17403955b9341",
+                "IrnDt": "2025-12-01 08:24:00"
+            },
+            "raw_jwt": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjRERTE1NDRBRTY5NUJEQzg0RUM3QkMxMkYyRjU3RjgxM0Y0NEUzMDEiLCJ4NXQiOiJUZUZVU3VhVnZjaE94N3dTOHZWX2dUOUU0d0UiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJOSUMiLCJkYXRhIjoie1wiU2VsbGVyR3N0aW5cIjpcIjA2QUFBQ00wODI5UTFaOFwiLFwiQnV5ZXJHc3RpblwiOlwiMDZBQUFDSTU4MzJQMVo5XCIsXCJEb2NOb1wiOlwiMTEwMjEwNDI3Nzg2XCIsXCJEb2NUeXBcIjpcIklOVlwiLFwiRG9jRHRcIjpcIjAxLzEyLzIwMjVcIixcIlRvdEludlZhbFwiOjEwOTU5MTEuMDIsXCJJdGVtQ250XCI6MixcIk1haW5Ic25Db2RlXCI6XCI4NDA3MzIxMFwiLFwiSXJuXCI6XCI1YjEzNTA1OGU3ZTY0YmI1MWU5MDFjNDk2ZWQxOGM3NjQzMWZhY2E3YzUwYTkzYTNmOWUxNzQwMzk1NWI5MzQxXCIsXCJJcm5EdFwiOlwiMjAyNS0xMi0wMSAwODoyNDowMFwifSJ9.zRgPRMEBM_kiPMpvNtKX13xPSdpp0pbTgCY2AIbD8Yy7Y6IANs7pxM4gMr39Zx_HDwsAcOOYinOQ1FS5-IEehOnCi7wkAI5I49gREaXZ0f7wMJCAuKjuhIWpwSH93nQM6SG_T89NtSaXg2ee6kSuDWIgIl-0xttVoafVMYyEmj4v2A0VXvXth7Re-JCX1Q9XiLCqP2P8G4NPVTOWUpuUTWHECA0v3lEFwzfRUi6epXs6BUuEm0xZR-F3cw83BVEUl1ymWIIrDDoBf5DWCSf3fofWgCBJaITZqAf6EeQxGQX2o8ALtUJTLLUuD9cpaSYeLFeM7EapE2J3_815U69qZw"
+        },
+        "validation_result": {
+            "status": "GOVERNMENT_VERIFIED",
+            "risk_level": "MEDIUM",
+            "note": "Scanned copy verified via government-issued QR"
+        }
+    }
 ]

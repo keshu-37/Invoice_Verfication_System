@@ -15,9 +15,9 @@ def get_connection():
     return mysql.connector.connect(**DB_CONFIG)
 
 
-# -------------------------------------------------
+
 # DUPLICATE CHECK (DATABASE)
-# -------------------------------------------------
+
 def is_duplicate_invoice_db(invoice_hash: str) -> bool:
     try:
         conn = get_connection()
@@ -43,9 +43,9 @@ def is_duplicate_invoice_db(invoice_hash: str) -> bool:
             conn.close()
 
 
-# -------------------------------------------------
+
 # SAVE INVOICE
-# -------------------------------------------------
+
 def save_invoice(record: InvoiceRecord):
     try:
         print(">>> Saving invoice to database...")
@@ -73,7 +73,7 @@ def save_invoice(record: InvoiceRecord):
         print(">>> Insert successful | ID:", cursor.lastrowid)
 
     except mysql.connector.IntegrityError as e:
-        # ✅ Duplicate invoice_hash (UNIQUE constraint)
+        #  Duplicate invoice_hash (UNIQUE constraint)
         if e.errno == 1062:
             print("⚠️ Duplicate invoice detected (DB level) — insert skipped")
         else:

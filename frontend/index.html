@@ -107,7 +107,7 @@ async function uploadInvoice() {
     formData.append("file", fileInput.files[0]);
 
     resultDiv.className = "result";
-    resultDiv.innerHTML = "🔍 Verifying invoice...";
+    resultDiv.innerHTML = "  Verifying invoice...";
     resultDiv.classList.remove("hidden");
 
     try {
@@ -129,7 +129,7 @@ async function uploadInvoice() {
 
         const status = data.status;
 
-        // ✅ Government verified
+        //   Government verified
         if (status === "GOVERNMENT_VERIFIED") {
             if (data.risk_level === "LOW") {
                 resultDiv.classList.add("success");
@@ -152,7 +152,7 @@ async function uploadInvoice() {
             return;
         }
 
-        // ⚠️ DUPLICATE INVOICE (NEW)
+        //   DUPLICATE INVOICE (NEW)
         if (status === "DUPLICATE_INVOICE") {
             resultDiv.classList.add("warning");
             resultDiv.innerHTML = `
@@ -162,7 +162,7 @@ async function uploadInvoice() {
             return;
         }
 
-        // ❌ Tampered
+        //   Tampered
         if (status === "TAMPERED") {
             resultDiv.classList.add("error");
             resultDiv.innerHTML = `
@@ -172,7 +172,7 @@ async function uploadInvoice() {
             return;
         }
 
-        // ❌ Not verified
+        //   Not verified
         if (status === "NOT_GOVERNMENT_VERIFIED") {
             resultDiv.classList.add("error");
             resultDiv.innerHTML = `

@@ -5,12 +5,12 @@ import jwt
 from pathlib import Path
 from cryptography.hazmat.primitives import serialization
 
-# ---------------- REGEX ----------------
+#   REGEX  
 GSTIN_REGEX = r"\b\d{2}[A-Z]{5}\d{4}[A-Z][A-Z\d]Z[A-Z\d]\b"
 IRN_REGEX = r"\b[a-fA-F0-9]{64}\b"
 
 
-# ---------------- JWT PAYLOAD ----------------
+#   JWT PAYLOAD  
 def decode_jwt_payload(jwt_token: str) -> dict | None:
     try:
         parts = jwt_token.split(".")
@@ -25,7 +25,7 @@ def decode_jwt_payload(jwt_token: str) -> dict | None:
         return None
 
 
-# ---------------- LEVEL 1 + 2 ----------------
+#   LEVEL 1 + 2  
 def extract_readable_invoice_data(qr_data: str | None) -> dict | None:
     """
     LEVEL-1 + LEVEL-2 validation
@@ -61,7 +61,7 @@ def extract_readable_invoice_data(qr_data: str | None) -> dict | None:
     return None
 
 
-# ---------------- LEVEL 3 ----------------
+#   LEVEL 3  
 def verify_nic_signature(jwt_token: str) -> bool:
     """
     Verifies QR JWT signature using NIC public key
@@ -88,7 +88,7 @@ def verify_nic_signature(jwt_token: str) -> bool:
         return False
 
 
-# ---------------- METADATA CHECK (DIGITAL ONLY) ----------------
+#   METADATA CHECK (DIGITAL ONLY)  
 def has_editing_metadata(pdf_metadata: dict) -> bool:
     suspicious_tools = [
         "ILOVEPDF", "SMALLPDF", "PDFSAM",
@@ -105,7 +105,7 @@ def has_editing_metadata(pdf_metadata: dict) -> bool:
     return False
 
 
-# ---------------- FINAL DECISION ENGINE ----------------
+#   FINAL DECISION ENGINE  
 def validate_invoice(
     *,
     input_type: str,
@@ -118,14 +118,14 @@ def validate_invoice(
     FINAL OFFLINE VALIDATION LOGIC
     """
 
-    # ❌ QR missing
+    #   QR missing
     if not qr_found:
         return {
             "status": "NOT_GOVERNMENT_VERIFIED",
             "reason": "Government-issued QR code not found"
         }
 
-    # ❌ QR exists but decode failed
+    #    QR exists but decode failed
     if qr_found and not qr_decoded:
        return {
         "status": "NOT_GOVERNMENT_VERIFIED",
@@ -133,7 +133,7 @@ def validate_invoice(
     }
 
 
-    # ❌ QR decoded but not valid govt QR
+    #   QR decoded but not valid govt QR
     readable_data = extract_readable_invoice_data(qr_data)
     if not readable_data:
         return {
@@ -141,14 +141,14 @@ def validate_invoice(
             "reason": "QR code is not issued by government system"
         }
 
-    # ❌ QR signature invalid
+    #   QR signature invalid
     if not verify_nic_signature(qr_data):
         return {
             "status": "NOT_GOVERNMENT_VERIFIED",
             "reason": "QR signature verification failed"
         }
 
-    # ❌ Digital PDF edited
+    #  Digital PDF edited
     if input_type == "DIGITAL_PDF" and pdf_metadata:
         if has_editing_metadata(pdf_metadata):
             return {
@@ -156,7 +156,7 @@ def validate_invoice(
                 "reason": "Digital PDF appears modified after generation"
             }
 
-    # ✅ GOVERNMENT VERIFIED
+    #   GOVERNMENT VERIFIED
     return {
         "status": "GOVERNMENT_VERIFIED",
         "risk_level": "LOW" if input_type == "DIGITAL_PDF" else "MEDIUM",
